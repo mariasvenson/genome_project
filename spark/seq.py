@@ -15,4 +15,9 @@ with pysam.AlignmentFile(bamUrl,"rb") as samfile:
                                 with open("/home/ubuntu/genome_project/spark/output.txt", "a") as f:
                                        f.write(str(kmers) + "\n")
         print len(kmer_list)
+        text_file = sc.textFile("/home/ubuntu/genome_project/spark/output.txt")
+        counts = text_file.flatMap(lambda line: line.split("\n")) \
+        			.map(lambda word: (word, 1)) \
+        			.reduceByKey(lambda a, b: a + b)
+        counts.saveAsTextFile("/home/ubuntu/genome_project/spark/omgwow.txt")
         samfile.close()
