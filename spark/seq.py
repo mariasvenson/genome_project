@@ -3,7 +3,8 @@ sc = SparkContext()
 
 import pysam
 bamUrl = "http://130.238.29.253:8080/swift/v1/1000-genomes-dataset/HG00096.chrom20.ILLUMINA.bwa.GBR.low_coverage.20120522.bam"
-with pysam.AlignmentFile(bamUrl,"rb") as samfile:
+bamUrl1 = "http://130.238.29.253:8080/swift/v1/1000-genomes-dataset/HG00097.chrom20.ILLUMINA.bwa.GBR.low_coverage.20130415.bam"
+with pysam.AlignmentFile(bamUrl,bamUrl1,"rb") as samfile:
         kmer = 10
         kmer_list = []
         for r in samfile.fetch(until_eof=True):
