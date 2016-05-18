@@ -1,7 +1,7 @@
 from pyspark import SparkContext
 sc = SparkContext()
-
 import pysam
+
 bamUrl = "http://130.238.29.253:8080/swift/v1/1000-genomes-dataset/HG00096.chrom20.ILLUMINA.bwa.GBR.low_coverage.20120522.bam"
 with pysam.AlignmentFile(bamUrl,"rb") as samfile:
         kmer = 10
