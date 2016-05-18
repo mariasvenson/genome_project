@@ -21,3 +21,5 @@ with pysam.AlignmentFile(bamUrl,"rb") as samfile:
         			.reduceByKey(lambda a, b: a + b)
         counts.saveAsTextFile("/home/ubuntu/genome_project/spark/omgwow.txt")
         samfile.close()
+
+        
