@@ -1,9 +1,21 @@
+/usr/bin/env python
+# -*- coding: UTF-8 -*-
 from pyspark import SparkContext
-sc = SparkContext()
-import pysam
+import pysam,os
 
-bamUrl = "http://130.238.29.253:8080/swift/v1/1000-genomes-dataset/HG00096.chrom20.ILLUMINA.bwa.GBR.low_coverage.20120522.bam"
-with pysam.AlignmentFile(bamUrl,"rb") as samfile:
+sc = SparkContext()
+PATH = "/home/ubuntu/genome_project/spark/bam_files/"
+
+def bamFiles():
+        bamUrl = os.listdir("/home/ubuntu/genome_project/spark/bam_files")
+        #distFiles = sc.parallelize(bamUrl)
+        for x in bamUrl:
+                runFile(x)
+        reduceKmers()
+        print "Done!!!!! OMG WOOOOOOWWWWWW"
+
+def runFile(file):
+        samfile = pysam.AlignmentFile(PATH+file, "rb")
         kmer = 10
         kmer_list = []
         for r in samfile.fetch(until_eof=True):
@@ -13,11 +25,16 @@ with pysam.AlignmentFile(bamUrl,"rb") as samfile:
                                 kmers = test[x:x+kmer]
                                 kmer_list.append(kmers)
                                 with open("/home/ubuntu/genome_project/spark/output.txt", "a") as f:
-                                       f.write(str(kmers) + "\n")
+                                                f.write(str(kmers) + "\n")
         print len(kmer_list)
+
+def reduceKmers():
         text_file = sc.textFile("/home/ubuntu/genome_project/spark/output.txt")
         counts = text_file.flatMap(lambda line: line.split("\n")) \
-        			.map(lambda word: (word, 1)) \
-        			.reduceByKey(lambda a, b: a + b)
+                                .map(lambda word: (word, 1)) \
+                                .reduceByKey(lambda a, b: a + b)
         counts.saveAsTextFile("/home/ubuntu/genome_project/spark/omgwow.txt")
         samfile.close()
+
+bamFiles()
+
