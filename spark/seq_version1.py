@@ -1,9 +1,12 @@
 from pyspark import SparkContext
-sc = SparkContext()
-import pysam
+import pysam 
 
-bamUrl = "http://130.238.29.253:8080/swift/v1/1000-genomes-dataset/HG00096.chrom20.ILLUMINA.bwa.GBR.low_coverage.20120522.bam"
-with pysam.AlignmentFile(bamUrl,"rb") as samfile:
+sc = SparkContext()
+PATH = "/home/ubuntu/genome_project/spark/bam_files/"
+KMER_PATH = "/home/ubuntu/genome_project/spark/txt_files/"
+#Find all kmers and save in file
+def findKmers(file):
+        samfile = pysam.AlignmentFile(PATH+file, "rb")
         kmer = 10
         kmer_list = []
         for r in samfile.fetch(until_eof=True):
@@ -12,14 +15,32 @@ with pysam.AlignmentFile(bamUrl,"rb") as samfile:
                         for x in range(len(test)+1 - kmer):
                                 kmers = test[x:x+kmer]
                                 kmer_list.append(kmers)
-                                with open("/home/ubuntu/genome_project/spark/output.txt", "a") as f:
-                                       f.write(str(kmers) + "\n")
+                                with open(KMER_PATH+ file[:7]+".txt", "a") as f:
+                                                f.write(str(kmers) + "\n")
         print len(kmer_list)
-        text_file = sc.textFile("/home/ubuntu/genome_project/spark/output.txt")
-        counts = text_file.flatMap(lambda line: line.split("\n")) \
-        			.map(lambda word: (word, 1)) \
-        			.reduceByKey(lambda a, b: a + b)
-        counts.saveAsTextFile("/home/ubuntu/genome_project/spark/omgwow.txt")
         samfile.close()
+        return kmer_list
 
-        
+def filterKmer(tuple):
+        if tuple[1] >= 10 and tuple[1] <= 200:
+                return tuple
+        else:
+                return None
+
+def bamFiles():
+        bamUrl = os.listdir("/home/ubuntu/genome_project/spark/bam_files")
+        #distFiles = sc.parallelize(bamUrl)
+        bamFiles = bamUrl[:6]
+        distFiles = sc.parallelize(bamFiles)
+
+        kmer_res = distFiles.flatMap(lambda file: findKmers(file)).map(lambda word: (word,1)).reduceByKey(lambda a,b: a+b)
+        kmer_res.saveAsTextFile("output_RAW")
+
+        kmer_range = kmer_res.map(lambda line: filterKmer(line)).filter(lambda obj: obj != None)
+        kmer_range.saveAsTextFile("kmers_range")
+        for obj in kmer_range.collect():
+                with open("/home/ubuntu/genome_project/spark/EVERYTHING.txt", "a") as f:
+                        f.write(str(obj) + "\n")
+
+
+bamFiles()
