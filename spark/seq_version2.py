@@ -15,7 +15,7 @@ def findKmers(file):
 	heat_list = []
         for r in samfile.fetch(until_eof=True):
                 if r.is_unmapped:
-			position = read.next_reference_start
+			position = r.next_reference_start
 			with open(HEAT + file[:7]+".txt", "a") as f:
                                                f.write(str(position) + "\n")
                         test = r.query_alignment_sequence
