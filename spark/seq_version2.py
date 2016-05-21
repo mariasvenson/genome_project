@@ -10,7 +10,7 @@ KMER =      "/home/ubuntu/genome_project/spark/kmer/"
 #Find all kmers and save in file
 
 def findPosition(heat_list):
-        res = map(lambda x: (x,1), heat_list)
+        res = map(lambda x: (x,1), heat_list).reduceByKey(lambda a,b: a+b)
         with open(HEAT+ file[:12]+".txt", "a") as f:
                         f.write(str(res) + "\n")
 
