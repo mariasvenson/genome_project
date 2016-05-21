@@ -30,7 +30,7 @@ def filterKmer(tuple):
 def bamFiles():
         bamUrl = os.listdir("/home/ubuntu/genome_project/spark/bam_files")
         #distFiles = sc.parallelize(bamUrl)
-        bamFiles = bamUrl[:4]
+        bamFiles = bamUrl[:6]
         distFiles = sc.parallelize(bamFiles)
 	
 	kmer_res = distFiles.flatMap(lambda file: findKmers(file)).map(lambda word: (word,1)).reduceByKey(lambda a,b: a+b)
