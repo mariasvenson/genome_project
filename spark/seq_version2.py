@@ -8,6 +8,15 @@ HEAT = 	    "/home/ubuntu/genome_project/spark/heat/"
 KUL =       "/home/ubuntu/genome_project/spark"
 KMER =      "/home/ubuntu/genome_project/spark/kmer/"
 #Find all kmers and save in file
+
+def findPosition(heat_list):
+        res = map(lambda x: (x,1), heat_list)
+        with open(HEAT+ file[:12]+".txt", "a") as f:
+                        f.write(str(res) + "\n")
+
+        #.reduceByKey(lambda a,b: a+b)
+        #mappa alla positioner som ligger i mappen  
+
 def findKmers(file):
         samfile = pysam.AlignmentFile(PATH+file, "rb")
         kmer = 10
@@ -16,17 +25,20 @@ def findKmers(file):
         for r in samfile.fetch(until_eof=True):
                 if r.is_unmapped:
 			position = r.next_reference_start
+			heat_list.append(position)
 			with open(HEAT + file[:7]+".txt", "a") as f:
                                                f.write(str(position) + "\n")
                         test = r.query_alignment_sequence
                         for x in range(len(test)+1 - kmer):
                                 kmers = test[x:x+kmer]
                                 kmer_list.append(kmers)
-                                with open(KMER_PATH+ file[:7]+".txt", "a") as f:
+                                with open(KMER+ file[:7]+".txt", "a") as f:
                                                 f.write(str(kmers) + "\n")
-        print len(kmer_list)
+
+        print "******** WORKING ON: " + file + "  WITH LENGTH:" + str(len(kmer_list)) + "**********"
 	samfile.close()
-	return kmer_list
+	findPosition(heat_list)
+	return (kmer_list)
 
 def filterKmer(tuple):
 	if tuple[1] >= 10 and tuple[1] <= 200:
@@ -43,7 +55,7 @@ def bamFiles():
                 os.makedirs(KUL + "/kmer/")
 	bamFiles = bamUrl[:2]
         distFiles = sc.parallelize(bamFiles)
-	
+
 	kmer_res = distFiles.flatMap(lambda file: findKmers(file)).map(lambda word: (word,1)).reduceByKey(lambda a,b: a+b)
 	#kmer_res.saveAsTextFile("output_RAW")
 
