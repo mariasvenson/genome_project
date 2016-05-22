@@ -14,9 +14,6 @@ def findPosition(heat_list):
 	for x in heat_list: 
 		pos = str(x)
 		a[3:]
-	for i in x:
-...     a = str(i)
-...     a[3:]
         res = map(lambda x: (x,1), heat_list)
 	#.reduceByKey(lambda a,b: a+b)
         with open(HEAT+ file[:12]+".txt", "a") as f:
