@@ -10,11 +10,18 @@ KMER =      "/home/ubuntu/genome_project/spark/kmer/"
 #Find all kmers and save in file
 
 def findPosition(heat_list):
-        res = map(lambda x: (x,1), heat_list).reduceByKey(lambda a,b: a+b)
+	reduced_list = []
+	for x in heat_list: 
+		pos = str(x)
+		a[3:]
+	for i in x:
+...     a = str(i)
+...     a[3:]
+        res = map(lambda x: (x,1), heat_list)
+	#.reduceByKey(lambda a,b: a+b)
         with open(HEAT+ file[:12]+".txt", "a") as f:
                         f.write(str(res) + "\n")
 
-        #.reduceByKey(lambda a,b: a+b)
         #mappa alla positioner som ligger i mappen  
 
 def findKmers(file):
@@ -56,7 +63,7 @@ def bamFiles():
 	bamFiles = bamUrl[:2]
         distFiles = sc.parallelize(bamFiles)
 
-	kmer_res = distFiles.flatMap(lambda file: findKmers(file)).map(lambda word: (word,1)).reduceByKey(lambda a,b: a+b)
+	kmer_res,heat_res = distFiles.flatMap(lambda file: findKmers(file)).map(lambda word: (word,1)).reduceByKey(lambda a,b: a+b)
 	#kmer_res.saveAsTextFile("output_RAW")
 
 	kmer_range = kmer_res.map(lambda line: filterKmer(line)).filter(lambda obj: obj != None)
@@ -67,3 +74,4 @@ def bamFiles():
 	
     
 bamFiles()
+
