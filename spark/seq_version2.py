@@ -13,11 +13,11 @@ def findPosition(heat_list):
 	reduced_list = []
 	for x in heat_list: 
 		pos = str(x)
-		a[3:]
-        res = map(lambda x: (x,1), heat_list)
+		red_pos = a[3:]
+		reduced_list.append(red_pos)
 	#.reduceByKey(lambda a,b: a+b)
-        with open(HEAT+ file[:12]+".txt", "a") as f:
-                        f.write(str(res) + "\n")
+        	with open(HEAT+ file[:7]+ ".txt", "a") as f:
+                        	f.write(str(res) + "\n")
 
         #mappa alla positioner som ligger i mappen  
 
@@ -30,8 +30,6 @@ def findKmers(file):
                 if r.is_unmapped:
 			position = r.next_reference_start
 			heat_list.append(position)
-			with open(HEAT + file[:7]+".txt", "a") as f:
-                                               f.write(str(position) + "\n")
                         test = r.query_alignment_sequence
                         for x in range(len(test)+1 - kmer):
                                 kmers = test[x:x+kmer]
@@ -60,7 +58,7 @@ def bamFiles():
 	bamFiles = bamUrl[:2]
         distFiles = sc.parallelize(bamFiles)
 
-	kmer_res,heat_res = distFiles.flatMap(lambda file: findKmers(file)).map(lambda word: (word,1)).reduceByKey(lambda a,b: a+b)
+	kmer_res = distFiles.flatMap(lambda file: findKmers(file)).map(lambda word: (word,1)).reduceByKey(lambda a,b: a+b)
 	#kmer_res.saveAsTextFile("output_RAW")
 
 	kmer_range = kmer_res.map(lambda line: filterKmer(line)).filter(lambda obj: obj != None)
