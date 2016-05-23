@@ -1,5 +1,5 @@
 from pyspark import SparkContext
-import pysam 
+import pysam, os 
 
 sc = SparkContext()
 PATH = "/home/ubuntu/genome_project/spark/bam_files/"
