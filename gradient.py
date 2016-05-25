@@ -17,6 +17,7 @@ def band(r,g,b):
 def print_gradient(f, step):
     number = 256
     max = number-1
+    partitions = 6
 
     for i in range(0,number,step):
         printh(f, band(i,0,0))
@@ -38,24 +39,22 @@ def print_gradient(f, step):
     for i in range(number-step, 0, -step):
         printh(f, band(0, 0, i))
 
-    return round( 6 * (max/step) - 3 )
+    return round( partitions * (max/step) - 3 )
 
 
 def gradient(path, max):
     f = open(path, "w")
 
-    printh(f, "<html><body>")
-    printh(f, "<table cellspacing='0'' cellpadding='0' height='500'>")
+    printh(f, "<table cellspacing='0'' cellpadding='0' height='300'>")
     levels = print_gradient(f, 64)
     printh(f, "</table>")
-    printh(f, "</body></html>")
 
     f.close()
 
     return levels
 
 def main():
-    print( "levels: {0}".format(gradient("legend.html", 200)) )
+    gradient("gradient.html", 200)
 
 if "__main__" == __name__:
     main()
