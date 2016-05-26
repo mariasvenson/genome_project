@@ -24,35 +24,48 @@ BAM_PATH = "http://130.238.29.253:8080/swift/v1/1000-genomes-dataset/"
 
 
 def findKmers(file):
-        samfile = pysam.AlignmentFile(BAM_PATH+file, "rb")
-        kmer = 10
-        kmer_list = []
-        for r in samfile.fetch(until_eof=True):
-                if r.is_unmapped:
-                        test = r.query_alignment_sequence
-                        for x in range(len(test)+1 - kmer):
-                                kmers = test[x:x+kmer]
-                                kmer_list.append(kmers)
-                                #with open(KMER+ file[:7]+".txt", "a") as f:
-                                #                f.write(str(kmers) + "\n")
+       	try: 
+		samfile = pysam.AlignmentFile(BAM_PATH+file, "rb")
+        	kmer = 10
+        	kmer_list = []
+       		for r in samfile.fetch(until_eof=True):
+                	if r.is_unmapped:
+                        	test = r.query_alignment_sequence
+                        	for x in range(len(test)+1 - kmer):
+                                	kmers = test[x:x+kmer]
+                                	kmer_list.append(kmers)
+                               		#with open(KMER+ file[:7]+".txt", "a") as f:
+                                	#                f.write(str(kmers) + "\n")
 
-        print "******** WORKING ON: " + file + "  WITH LENGTH:" + str(len(kmer_list)) + "**********"
-	samfile.close()
-	return (kmer_list)
+        	print "******** WORKING ON: " + file + "  WITH LENGTH:" + str(len(kmer_list)) + "**********"
+		samfile.close()
+	except: 
+		os.remove("/home/ubuntu/genome_project/spark/"+file+".bai")
+		return (kmer_list)
+	
+	else: 
+		os.remove("/home/ubuntu/genome_project/spark/"+file+".bai")
+		return (kmer_list)
 
 def findPosition(file):
-        samfile = pysam.AlignmentFile(BAM_PATH+file, "rb")
-        heat_list = []
-        for r in samfile.fetch(until_eof=True):
-                if r.is_unmapped:
-                        position = r.next_reference_start
-                        round_pos = int(round(position,-3)) 
-			heat_list.append(round_pos) 
+        try:
+		samfile = pysam.AlignmentFile(BAM_PATH+file, "rb")
+        	heat_list = []
+        	for r in samfile.fetch(until_eof=True):
+                	if r.is_unmapped:
+                        	position = r.next_reference_start
+                        	round_pos = int(round(position,-3)) 
+				heat_list.append(round_pos) 
 
-        print "******** WORKING ON: " + file + "  WITH LENGTH:" + str(len(heat_list)) + "**********"
-        samfile.close()
-        #findPosition(heat_list)
-        return (heat_list)
+        	print "******** WORKING ON: " + file + "  WITH LENGTH:" + str(len(heat_list)) + "**********"
+        	samfile.close()
+        except:
+                os.remove("/home/ubuntu/genome_project/spark/"+file+".bai")
+                return (heat_list)
+
+        else:
+                os.remove("/home/ubuntu/genome_project/spark/"+file+".bai")
+                return (heat_list)
 
 
 def extractKmers(tuple):
@@ -69,7 +82,7 @@ def bamFiles():
 			bamFiles.append(file) 
 	print bamFiles 
        
-	run_bamFiles = bamFiles[:2]
+	run_bamFiles = bamFiles[:10]
         distFiles = sc.parallelize(run_bamFiles)
 	
 	if str(sys.argv[1]) == "kmers":	
