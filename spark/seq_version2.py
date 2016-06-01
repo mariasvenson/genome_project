@@ -1,7 +1,8 @@
-from pyspark import SparkContext
+from pyspark import SparkContext, SparkConf
 import pysam,os, sys
+conf = SparkConf().setAppName("appname").setMaster("spark://kgproject-4.openstacklocal:7077")
+sc = SparkContext(conf=conf)
 
-sc = SparkContext()
 PATH = "/home/ubuntu/genome_project/spark/bam_files/"
 KMER_PATH = "/home/ubuntu/genome_project/spark/txt_files/"
 HEAT = 	    "/home/ubuntu/genome_project/spark/heat/"
@@ -40,11 +41,14 @@ def findKmers(file):
         	print "******** WORKING ON: " + file + "  WITH LENGTH:" + str(len(kmer_list)) + "**********"
 		samfile.close()
 	except: 
-		os.remove("/home/ubuntu/genome_project/spark/"+file+".bai")
+		if os.path.exists("/home/ubuntu/genome_project/spark/"+file+".bai"):
+			os.remove("/home/ubuntu/genome_project/spark/"+file+".bai")
 		return (kmer_list)
+
 	
 	else: 
-		os.remove("/home/ubuntu/genome_project/spark/"+file+".bai")
+		if os.path.exists("/home/ubuntu/genome_project/spark/"+file+".bai"):
+                        os.remove("/home/ubuntu/genome_project/spark/"+file+".bai")
 		return (kmer_list)
 
 def findPosition(file):
@@ -60,11 +64,13 @@ def findPosition(file):
         	print "******** WORKING ON: " + file + "  WITH LENGTH:" + str(len(heat_list)) + "**********"
         	samfile.close()
         except:
-                os.remove("/home/ubuntu/genome_project/spark/"+file+".bai")
+                if os.path.exists("/home/ubuntu/genome_project/spark/"+file+".bai"):
+                        os.remove("/home/ubuntu/genome_project/spark/"+file+".bai")
                 return (heat_list)
 
         else:
-                os.remove("/home/ubuntu/genome_project/spark/"+file+".bai")
+                if os.path.exists("/home/ubuntu/genome_project/spark/"+file+".bai"):
+                        os.remove("/home/ubuntu/genome_project/spark/"+file+".bai")
                 return (heat_list)
 
 
@@ -82,7 +88,7 @@ def bamFiles():
 			bamFiles.append(file) 
 	print bamFiles 
        
-	run_bamFiles = bamFiles[:10]
+	run_bamFiles = bamFiles[:2]
         distFiles = sc.parallelize(run_bamFiles)
 	
 	if str(sys.argv[1]) == "kmers":	
@@ -90,7 +96,7 @@ def bamFiles():
 		kmer_res = distFiles.flatMap(lambda file: findKmers(file)).map(lambda word: (word,1)).reduceByKey(lambda a,b: a+b)
 		#kmer_res.saveAsTextFile("output_RAW")
 		kmer_range = kmer_res.map(lambda line: extractKmers(line)).filter(lambda obj: obj != None)
-        	kmer_range.saveAsTextFile("kmers_range")
+        	#kmer_range.saveAsTextFile("/home/ubuntu/genome_project/spark/kmers_range")
         	for obj in kmer_range.collect():
                 	with open("/home/ubuntu/genome_project/spark/EVERYTHING.txt", "a") as f:
                         	f.write(str(obj) + "\n")
@@ -98,7 +104,7 @@ def bamFiles():
 	elif str(sys.argv[1]) == "heat":  
 	
 		heat_res = distFiles.flatMap(lambda file: findPosition(file)).map(lambda word: (word,1)).reduceByKey(lambda a,b: a+b)
-		heat_res.saveAsTextFile("heat_range")
+		#heat_res.saveAsTextFile("heat_range")
 		for obj in heat_res.collect():
                		with open("/home/ubuntu/genome_project/spark/POSITIONS.txt", "a") as f:
                         	f.write(str(obj) + "\n")
