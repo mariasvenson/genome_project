@@ -1,5 +1,6 @@
 from pyspark import SparkContext, SparkConf
 import pysam,os, sys
+import numpy as np
 
 conf = SparkConf().setAppName("genome_project").setMaster("spark://kgproject-4.openstacklocal:7077")
 sc = SparkContext(conf=conf)
@@ -8,6 +9,12 @@ PATH = "/home/ubuntu/genome_project/spark/bam_files/"
 KMER_PATH = "/home/ubuntu/genome_project/spark/txt_files/"
 KMER =      "/home/ubuntu/genome_project/spark/kmer/"
 BAM_PATH = "http://130.238.29.253:8080/swift/v1/1000-genomes-dataset/"
+
+# graph
+import plotly.plotly as py
+import plotly.graph_objs as go
+import plotly.tools as pl
+pl.set_credentials_file(username='mariasvenson', api_key='rgphv7aivd')
 
 #Read BAM file, find unmapped reads and extract all kmers 
 def findKmers(file):
@@ -93,7 +100,7 @@ def bamFiles():
                 	with open("/home/ubuntu/genome_project/spark/result_kmers.txt", "a") as f:
                         	f.write(str(obj) + "\n")
 
-	elif str(sys.argv[1]) == "heat":  
+	elif str(sys.argv[1]) == "pos":  
 	
 		heat_res = distFiles.flatMap(lambda file: findPosition(file)).map(lambda word: (word,1)).reduceByKey(lambda a,b: a+b)
 		#heat_res.saveAsTextFile("heat_range")
@@ -101,5 +108,39 @@ def bamFiles():
                		with open("/home/ubuntu/genome_project/spark/result_positions.txt", "a") as f:
                         	f.write(str(obj) + "\n")
 	
-    
+
+
+#N = 500
+	plot_x = []
+	plot_y = []
+
+	for obj in heat_res.collect():
+		plot_x.append(obj[0])
+		plot_y.append(obj[1])
+
+	trace0 = go.Scatter(
+    	x = plot_x,
+    	y = plot_y,
+    	name = 'unmapped',
+    	mode = 'markers',
+    	marker = dict(
+        	size = 8,
+        	color = 'rgba(152, 0, 0, .8)',
+        	line = dict(
+            	width = 2,
+            	color = 'rgb(0, 0, 0)'
+	        )
+	    )
+	)
+
+	data = [trace0]
+
+	layout = dict(title = 'Styled Scatter',
+        	      yaxis = dict(zeroline = False),
+         	      xaxis = dict(zeroline = False)
+	             )
+
+	fig = dict(data=data, layout=layout)
+	py.iplot(fig, filename='unmapped-scatter')
+
 bamFiles()
