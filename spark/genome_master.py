@@ -1,6 +1,5 @@
 from pyspark import SparkContext, SparkConf
 import pysam,os, sys
-import numpy as np
 
 conf = SparkConf().setAppName("genome_project").setMaster("spark://kgproject-4.openstacklocal:7077")
 sc = SparkContext(conf=conf)
@@ -52,7 +51,7 @@ def findPosition(file):
         	for r in samfile.fetch(until_eof=True):
                 	if r.is_unmapped:
                         	position = r.next_reference_start
-                        	round_pos = int(round(position,-3)) 
+                        	round_pos = int(round(position,-5)) 
 				heat_list.append(round_pos) 
 
         	print "******** WORKING ON: " + file + "  WITH LENGTH:" + str(len(heat_list)) + "**********"
@@ -78,17 +77,20 @@ def extractKmers(tuple):
 
 #Create a list of all BAMfiles
 def bamFiles():
-	all_files = sc.textFile("/home/ubuntu/genome_project/spark/all_files/index.html")
 	bamFiles = []
-	for file in all_files.collect():
-		if file[-3:] == "bam":
-			bamFiles.append(file) 
-	print bamFiles 
+	#all_files = sc.textFile("/home/ubuntu/genome_project/spark/all_files/index.html")
+	with open("/home/ubuntu/genome_project/spark/all_files/index.html", "r") as files:
+		for file in files: 
+			file = file.rstrip("\n")
+	#for file in all_files.collect():
+			if file[-3:] == "bam":
+				bamFiles.append(file) 
+	#print bamFiles 
        
-	run_bamFiles = bamFiles[:2]
+	#run_bamFiles = bamFiles[]
 	
 #Parallelizing the BAMfile names
-        distFiles = sc.parallelize(run_bamFiles)
+        distFiles = sc.parallelize(bamFiles,16)
 	
 	if str(sys.argv[1]) == "kmers":	
 
@@ -109,8 +111,7 @@ def bamFiles():
                         	f.write(str(obj) + "\n")
 	
 
-
-#N = 500
+#Plot
 	plot_x = []
 	plot_y = []
 
@@ -135,12 +136,12 @@ def bamFiles():
 
 	data = [trace0]
 
-	layout = dict(title = 'Styled Scatter',
+	layout = dict(title = 'Position of the unmapped mate/next read.',
         	      yaxis = dict(zeroline = False),
          	      xaxis = dict(zeroline = False)
 	             )
 
 	fig = dict(data=data, layout=layout)
-	py.iplot(fig, filename='unmapped-scatter')
+	py.iplot(fig, filename='scatter-ALL_Files')
 
 bamFiles()
