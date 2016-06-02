@@ -14,7 +14,9 @@ extracts all the positions or kmers depending of your choise.
 Finding the kmers, enter the [FLAG] = "kmers"
 Finding the position of the unmapped reads mate, enter the [FLAG] = "pos"
 
-2. Run the program: python genome_project [FLAG]
+2. Run the program: 
+```python python genome_project [FLAG]
+```
 
 
 
