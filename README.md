@@ -16,7 +16,7 @@ Finding the position of the unmapped reads mate, enter the [FLAG] = "pos"
 
 * Run the program: 
 ```python
-   python genome_project [FLAG]
+   python genome_project.py [FLAG]
 ``` 
 
 
