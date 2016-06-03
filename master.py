@@ -1,15 +1,18 @@
 # parameters
-input_path = "positions.txt"
+input_path = "positions.sorted.txt"
 output_path = "heatmap.html"
 template_path = "template.html"
 xaxis_path = "xaxis.html"
-yaxis_path = "yaxis.html"
 scale_path = "scale.html"
-size = 400
-maxscore = 1500
+size = 100
+maxscore = 218635
 gradient_step = 64
+start_position = 100000
+block_width = int(800/size)
+sample_step = 100000
 use_hue = True # http://www.w3schools.com/cssref/css_colors_legal.asp
 # end parameters
+
 
 import sys
 import math
@@ -69,11 +72,14 @@ def get_color(number, step, gradient):
     return gradient.get(index * step, "#ffffff")
 
 
-def create_block(gradient, gradient_step,  index, block):
+def create_block(gradient, gradient_step,  index, width, block):
+    global size, sample_step, start_position
+
     f = open("block/block_{:05d}.fragment.html".format(index), "w")
 
-    widthtag =  {False : "",True: " width='2' "}[index == 0]
+    widthtag =  {False : "",True: " width='{0}' ".format(width)}[index == 0]
 
+    f.write("<td valign='middle' style='font-weight: bold; font-size: 60%'>{0}</td><td width='20'/>".format(index * size * sample_step + start_position))
     for i in range(len(block)):
         f.write("<td bgcolor='{0}'{1}></td>".format(get_color(block[i][1], gradient_step, gradient), widthtag))
 
@@ -103,13 +109,15 @@ while line:
 
     block.append([line[0], int(line[1])])
     if count == size:
-        create_block(gradient, gradient_step, index, block[:])
+        create_block(gradient, gradient_step, index, block_width, block[:])
         block = []
         index += 1
         count = 0
 
     line = pos.readline()
     count += 1
+
+create_block(gradient, gradient_step, index, block_width, block)
 
 pos.close()
 
@@ -146,17 +154,9 @@ scale.close()
 
 # xaxis
 axis = open(xaxis_path,"w")
+colspan = int(size/10)
+axis.write("<td colspan='{0}'></td>".format(colspan))
+for i in range(1, int(size/colspan)):
+    axis.write("<td colspan='{0}'>{1}</td>".format(colspan,i*sample_step))
 
-axis.write("<td colspan='100'></td>")
-for i in range(1, int(size/100)):
-    axis.write("<td colspan='100'>{0}</td>".format(i*100))
-
-axis.close()
-
-#yaxis
-axis = open(yaxis_path,"w")
-axis.write("<table style='font-weight: bold' height='300' >")
-for i in range(1, len(html_block) + 1 ):
-    axis.write("<tr><td>{0}</td></tr>".format(i*size))
-axis.write("</table>")
 axis.close()
