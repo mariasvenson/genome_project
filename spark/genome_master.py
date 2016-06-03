@@ -86,9 +86,8 @@ def bamFiles():
 			if file[-3:] == "bam":
 				bamFiles.append(file) 
 	#print bamFiles 
-       
 	#run_bamFiles = bamFiles[]
-	
+
 #Parallelizing the BAMfile names
         distFiles = sc.parallelize(bamFiles,len(bamFiles))
 	
@@ -114,7 +113,8 @@ def bamFiles():
 #Plot
 	plot_x = []
 	plot_y = []
-
+	 if (str(sys.argv[1] == "kmers")):
+        	return
 	for obj in heat_res.collect():
 		plot_x.append(obj[0])
 		plot_y.append(obj[1])
@@ -143,5 +143,6 @@ def bamFiles():
 
 	fig = dict(data=data, layout=layout)
 	py.iplot(fig, filename='scatter-ALL_Files')
+
 
 bamFiles()
