@@ -90,7 +90,7 @@ def bamFiles():
 	#run_bamFiles = bamFiles[]
 	
 #Parallelizing the BAMfile names
-        distFiles = sc.parallelize(bamFiles,16)
+        distFiles = sc.parallelize(bamFiles,len(bamFiles))
 	
 	if str(sys.argv[1]) == "kmers":	
 
